@@ -51,7 +51,7 @@ struct  SignIn_Page: View {
 
                 }
                 NavigationLink {
-//                    Signup_Page()
+                    SignUp()
                 } label: {
                     Text("Log In")
                         .padding()
