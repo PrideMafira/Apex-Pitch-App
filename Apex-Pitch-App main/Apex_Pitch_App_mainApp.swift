@@ -11,7 +11,7 @@ import SwiftUI
 struct Apex_Pitch_App_mainApp: App {
     var body: some Scene {
         WindowGroup {
-            SignIn_Page()
+            WelcomePage()
         }
     }
 }
