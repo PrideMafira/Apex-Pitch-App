@@ -81,7 +81,7 @@ struct TabPage: View {
                 }
                
                 NavigationLink{
-//                    Add_Idea_Page(ideas: $ideas)
+                    addIdeaPage(ideas: $ideas)
                 }label: {
                     Label("Create", systemImage: "plus")
                         .padding()
