@@ -48,7 +48,7 @@ struct SignUp: View {
             .padding()
             
             NavigationLink {
-                HomePage()
+//                Home_Page()
             } label: {
                 Text("Sign up")
                     .padding()

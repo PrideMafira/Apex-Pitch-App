@@ -30,7 +30,8 @@ struct TabPage: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Top Tabs
+                
+                // --- Top Tab Bar ---
                 HStack {
                     ForEach(tabs, id: \.self) { tab in
                         Button {
@@ -54,112 +55,39 @@ struct TabPage: View {
                 .background(Color(.systemGray6))
                 .shadow(radius: 1)
                 
-                // Display Selected View
-                if ideasForCurrentTab.isEmpty {
-                    VStack {
-                        Spacer()
-                        Image(systemName: "lightbulb")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
-                        Text("No ideas yet")
-                            .font(.title3)
-                            .foregroundColor(.gray)
-                            .padding(.top, 8)
-                        Spacer()
-                    }
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(ideasForCurrentTab) { idea in
-                                VStack(alignment: .leading, spacing: 12) {
-                                    HStack {
-                                        Text(idea.startupName)
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                        
-                                        Spacer()
-                                        
-                                        Text(idea.type.rawValue)
-                                            .font(.caption)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Color.blue.opacity(0.1))
-                                            .cornerRadius(8)
-                                            .foregroundColor(.blue)
+                // --- Display Selected View ---
+                ScrollView {
+                    ForEach(ideas.filter({$0.type == selectedTab})) { idea in
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 150)
+                            .overlay {
+                                VStack {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text("Startup name: \(idea.startupName)")
+                                        Text("Idea description: \(idea.ideaDescription)")
+                                        Text("Funding goal: \(idea.fundingGoal)")
+                                        Text("Funding raised: \(idea.fundingRaised)")
+                                            .font(.default)
                                     }
-                                    
-                                    Text(idea.ideaDescription)
-                                        .font(.body)
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(10)
-                                    
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Goal: $\(idea.fundingGoal)")
-                                                .font(.subheadline)
-                                            Text("Raised: $\(idea.fundingRaised)")
-                                                .font(.subheadline)
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        // Progress indicator
-                                        let goal = Double(idea.fundingGoal) ?? 0
-                                        let raised = Double(idea.fundingRaised) ?? 0
-                                        let progress = goal > 0 ? raised / goal : 0
-                                        
-                                        VStack(alignment: .trailing) {
-                                            Text("\(Int(progress * 100))%")
-                                                .font(.caption)
-                                                .foregroundColor(.blue)
-                                            ProgressView(value: progress)
-                                                .progressViewStyle(LinearProgressViewStyle())
-                                                .frame(width: 80)
-                                        }
-                                    }
+                                    .padding()
                                 }
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemBackground))
-                                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-                                )
+                                .padding(.horizontal)
+                                //to nice out the view you use stacks inside
+                                //to display the more things you use the .ideadescription
                             }
-                            .padding(.horizontal)
-                        }
-                        .padding(.vertical)
                     }
+                    .padding(.top)
                 }
-                
-                // Add Idea Button
-                NavigationLink {
+               
+                NavigationLink{
                     addIdeaPage(ideas: $ideas)
-                } label: {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                        Text("Create Idea")
-                            .font(.headline)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                }label: {
+                    Label("Create", systemImage: "plus")
+                        .padding()
                 }
+                Spacer()
             }
-            .navigationTitle("My Ideas")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-        
-    }
-    
-    // Computed property for filtered ideas
-    private var ideasForCurrentTab: [Idea] {
-        ideas.filter { idea in
-            idea.type == selectedTab
         }
     }
 }
@@ -167,5 +95,3 @@ struct TabPage: View {
 #Preview {
     TabPage()
 }
-
-

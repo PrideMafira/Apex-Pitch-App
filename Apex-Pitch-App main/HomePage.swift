@@ -47,6 +47,7 @@ struct HomePage: View {
                 
                 NavigationLink {
                     Meetings(showWebView: "https://zoom.us/signin")
+//                    Zoom_Meetings_Page(showWebView: "https://zoom.us/signin")
                 } label: {
                     Text("Meetings")
                         .font(.title2)
@@ -61,7 +62,7 @@ struct HomePage: View {
                 
 
                         NavigationLink {
-                            Settings()
+//                            Settings_Page()
                         } label: {
                             Image(systemName: "gearshape.2")
                                 .resizable()
