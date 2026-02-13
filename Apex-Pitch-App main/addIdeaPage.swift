@@ -8,6 +8,23 @@
 import SwiftUI
 import Combine
 
+import SwiftUI
+
+enum Types: String, CaseIterable {
+    case concepts = "Concept"
+    case prototype = "Prototype"
+    case funded = "Funded"
+}
+
+struct Idea {
+    let startupName: String
+    let ideaDescription: String
+    let fundingGoal: String
+    let fundingRaised: String
+    let type: Types
+}
+
+
 struct addIdeaPage: View {
     @State private var Startup_name = ""
     @State private var Description: String = ""

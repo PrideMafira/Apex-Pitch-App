@@ -6,20 +6,8 @@
 //
 
 import SwiftUI
-enum Types: String{
-    case concepts = "Concepts"
-    case prototype = "Prototype"
-    case funded = "Funded"
-}
 
-struct Idea: Identifiable {
-    var id = UUID()
-    var startupName: String
-    var ideaDescription: String
-    var fundingGoal: String
-    var fundingRaised: String
-    var type: Types
-}
+
 
 struct TabPage: View {
     @State private var selectedTab: Types = .concepts
@@ -30,7 +18,6 @@ struct TabPage: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                
                 // --- Top Tab Bar ---
                 HStack {
                     ForEach(tabs, id: \.self) { tab in
@@ -56,40 +43,115 @@ struct TabPage: View {
                 .shadow(radius: 1)
                 
                 // --- Display Selected View ---
-                ScrollView {
-                    ForEach(ideas.filter({$0.type == selectedTab})) { idea in
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 150)
-                            .overlay {
-                                VStack {
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        Text("Startup name: \(idea.startupName)")
-                                        Text("Idea description: \(idea.ideaDescription)")
-                                        Text("Funding goal: \(idea.fundingGoal)")
-                                        Text("Funding raised: \(idea.fundingRaised)")
-                                            .font(.default)
-                                    }
-                                    .padding()
-                                }
-                                .padding(.horizontal)
-                                //to nice out the view you use stacks inside
-                                //to display the more things you use the .ideadescription
-                            }
+                if filteredIdeas.isEmpty {
+                    VStack {
+                        Spacer()
+                        Image(systemName: "lightbulb")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                        Text("No ideas yet")
+                            .font(.title3)
+                            .foregroundColor(.gray)
+                            .padding(.top, 8)
+                        Spacer()
                     }
-                    .padding(.top)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(filteredIdeas) { idea in
+                                VStack(alignment: .leading, spacing: 12) {
+                                    HStack {
+                                        Text(idea.startupName)
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        Text(idea.type.rawValue)
+                                            .font(.caption)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(Color.blue.opacity(0.1))
+                                            .cornerRadius(8)
+                                            .foregroundColor(.blue)
+                                    }
+                                    
+                                    Text(idea.ideaDescription)
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(3)
+                                    
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("Goal: $\(idea.fundingGoal)")
+                                                .font(.subheadline)
+                                            Text("Raised: $\(idea.fundingRaised)")
+                                                .font(.subheadline)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        // Progress indicator
+                                        let goal = Double(idea.fundingGoal) ?? 0
+                                        let raised = Double(idea.fundingRaised) ?? 0
+                                        let progress = goal > 0 ? raised / goal : 0
+                                        
+                                        VStack(alignment: .trailing) {
+                                            Text("\(Int(progress * 100))%")
+                                                .font(.caption)
+                                                .foregroundColor(.blue)
+                                            ProgressView(value: progress)
+                                                .progressViewStyle(LinearProgressViewStyle())
+                                                .frame(width: 80)
+                                        }
+                                    }
+                                }
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                                )
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.vertical)
+                    }
                 }
-               
-                NavigationLink{
+                
+                // --- Add Idea Button ---
+                NavigationLink {
                     addIdeaPage(ideas: $ideas)
-                }label: {
-                    Label("Create", systemImage: "plus")
-                        .padding()
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                        Text("Create Idea")
+                            .font(.headline)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
-                Spacer()
             }
+            .navigationTitle("My Ideas")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
+    
+    // Computed property for filtered ideas
+    private var filteredIdeas: [Idea] {
+        ideas.filter { $0.type == selectedTab }
+    }
+}
+
+// MARK: - Idea needs to conform to Identifiable
+extension Idea: Identifiable {
+    var id: String { startupName + ideaDescription }
 }
 
 #Preview {
