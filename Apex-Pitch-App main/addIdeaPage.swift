@@ -8,7 +8,6 @@
 import SwiftUI
 import Combine
 
-import SwiftUI
 
 enum Types: String, CaseIterable {
     case concepts = "Concept"
@@ -24,122 +23,99 @@ struct Idea {
     let type: Types
 }
 
-
 struct addIdeaPage: View {
-    @State private var Startup_name = ""
-    @State private var Description: String = ""
+    @State private var startupName: String = ""
+    @State private var description: String = ""
     @State private var selectedStage: Types = .concepts
-    @State private var Stages: [Types] = [.concepts, .prototype, .funded]
-    @State private var Funding_Goal = ""
-    @State private var Funding_Raised = ""
+    @State private var fundingGoal: String = ""
+    @State private var fundingRaised: String = ""
+    
     @Environment(\.dismiss) var dismiss
-    @Environment(\.dismiss) var dismiss2
+    @Binding var ideas: [Idea]
     
-    @Binding  var ideas: [Idea]
-  
+    // Removed duplicate @Environment(\.dismiss) var dismiss2
+    
     var body: some View {
-        NavigationStack {
+        NavigationView { // Add NavigationView for better UI structure
             VStack {
-                HStack {
-                    Text("Startup Name:")
-                        .padding()
-                    Spacer()
-                }
-                
-                TextField("Enter your startup name", text: $Startup_name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .cornerRadius(3)
-                    .padding()
-                
-                HStack {
-                    Text("Idea description:")
-                        .padding()
-                    Spacer()
-                }
-                
-                TextEditor(text: $Description)
-                    .frame(height: 100)
-                    .border(Color.gray)
-                    .cornerRadius(3)
-                    .padding()
-                
-                Picker("Stages", selection: $selectedStage) {
-                    ForEach($Stages, id: \.self) { $stage in
-                        Text(stage.rawValue)
-                    }
-                }
-                .pickerStyle(.navigationLink)
-                .padding()
-                
-                HStack {
-                    Text("Funding Goal($):")
-                        .padding()
-                    Spacer()
-                }
-                
-                TextField("e.g 10000", text: $Funding_Goal)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .cornerRadius(3)
-                    .padding()
-                
-                HStack {
-                    Text("Funding Raised($):")
-                        .padding()
-                    Spacer()
-                }
-                
-                TextField("e.g 10", text: $Funding_Raised)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .cornerRadius(3)
-                    .padding()
-                
-                Spacer()
-                
-                HStack {
-                    Button {
-                        dismiss2()
-                    } label: {
-                        Text("Cancel")
-                                                  
-                            .offset(x: 150)
-                            .padding()
-                        Spacer()
+                Form {
+                    Section(header: Text("Startup Details")) {
+                        TextField("Enter startup name", text: $startupName)
                         
-                    }
-                    .padding()
-                    
-                    HStack {
-                        HStack {
-                            //not allowing a user to save an idea without entering information
-                            if !Startup_name.isEmpty && !Description.isEmpty && !Funding_Goal.isEmpty && !Funding_Raised.isEmpty {
-                                
-                            
-                            Button {
-                                let newIdea = Idea(startupName: Startup_name, ideaDescription: Description, fundingGoal: Funding_Goal, fundingRaised: Funding_Raised, type: selectedStage)
-                                ideas.append(newIdea)
-                                print("ideas")
-                                dismiss()
-                            } label: {
-                                Text("Add Idea")
-                                    .padding()
-                           
+                        // Using TextEditor with appropriate styling
+                        ZStack(alignment: .topLeading) {
+                            if description.isEmpty {
+                                Text("Enter idea description...")
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 8)
+                                    .padding(.leading, 5)
                             }
-                            .padding(20)
-                            .offset(x: -50)
+                            TextEditor(text: $description)
+                                .frame(minHeight: 100)
                         }
-                           
-                            
-                        }
-                        
                     }
                     
+                    Section(header: Text("Funding")) {
+                        TextField("Goal (e.g. 10000)", text: $fundingGoal)
+                            .keyboardType(.numberPad)
+                        
+                        TextField("Raised (e.g. 10)", text: $fundingRaised)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    Section(header: Text("Stage")) {
+                        Picker("Stage", selection: $selectedStage) {
+                            ForEach(Types.allCases, id: \.self) { stage in
+                                Text(stage.rawValue)
+                            }
+                        }
+                        .pickerStyle(.segmented) // Better UI for selection
                     }
                 }
-
+                
+                // Action buttons
+                HStack {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(10)
+                    
+                    // Enable button only when required fields are filled
+                    Button("Add Idea") {
+                        let newIdea = Idea(
+                            startupName: startupName,
+                            ideaDescription: description,
+                            fundingGoal: fundingGoal,
+                            fundingRaised: fundingRaised,
+                            type: selectedStage
+                        )
+                        ideas.append(newIdea)
+                        dismiss()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(isFormValid ? Color.blue : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .disabled(!isFormValid)
+                }
+                .padding()
             }
-        
+            .navigationTitle("Add New Idea")
+            .navigationBarTitleDisplayMode(.inline)
         }
+    }
     
+    // Computed property to validate form
+    private var isFormValid: Bool {
+        !startupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !fundingGoal.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !fundingRaised.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
 #Preview {
